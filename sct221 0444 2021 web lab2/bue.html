@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="mystyle.css">
+    <link rel="stylesheet" href="coverflow.css">
+    <title>Your Albums</title>
+    <script src="jquery.min.js"></script>
+    <script src="sly.min.js"></script>
+    <script src="coverflow.js"></script>
+    <script>
+        document.getElementsByTagName('html')[0].className += ' ' + ("ActiveXObject" in window ? 'ie' : 'no-ie');
+
+        // Your Coverflow initialization code here
+        function coverflowimages(options){
+	if ( !document.getElementById('coverflowoverlay') ){
+		var $overlay = $('<div id="coverflowoverlay" />').appendTo(document.body)
+		var $enlargearea = $('<div id="coverenlargearea" />').appendTo(document.body)
+	}
+	else{
+		var $overlay = $('#coverflowoverlay')
+		var $enlargearea = $('#coverenlargearea')
+	}
+	var $body = $(document.body)
+	var $overlayenlarge = $overlay.add($enlargearea)
+	var $wrap  = $('#' + options.coverid)
+	var $frame = $wrap.find('div.frame:eq(0)')
+	var frameinnerHTML = ''
+	var activeitem = -1
+	var onselecteditemclick = options.onselecteditemclick || selecteditemaction
+
+	var preloadimages = []
+	for (var i = 0; i<options.images.length; i++){
+		if (options.images[i][1]){
+			if (options.preloadlarge){
+				preloadimages[i] = new Image()
+				preloadimages[i].src = options.images[i][1]
+			}
+		}
+		frameinnerHTML += '<li style="background-image:url(' + options.images[i][0] + ')" data-itemindex="' + i +'"></li>\n'
+	}
+	$frame.find('ul:eq(0)').html( frameinnerHTML )
+
+	function selecteditemaction(e, activeitem){ // default call back function for onselecteditemclick, showing enlarged image
+		$overlay.css({opacity:.9, zIndex: 1000})
+		$enlargearea.html('<img src="' + options.images[activeitem][1] + '"/>' + 
+			((options.images[activeitem][2])? '<div id="desc">' + options.images[activeitem][2] +'</div>': '')
+		)
+
+		var maxheight = $(window).height()
+		$enlargearea.css({opacity:1, zIndex: 1001})
+		.data('isvisible', true)
+		.find('img:eq(0)')
+			.css({maxWidth: $(window).width() * .95, maxHeight: $(window).height()})
+		e.stopPropagation()
+
+	}
+	
+	// Call Sly on frame. See https://github.com/darsain/sly/blob/master/docs/Options.md
+	$frame.sly({
+		horizontal: 1,
+		itemNav: 'forceCentered',
+		smart: 1,
+		activateMiddle: 1,
+		activateOn: 'click',
+		mouseDragging: 1,
+		touchDragging: 1,
+		releaseSwing: 1,
+		startAt: 1,
+		scrollBar: $wrap.find('.scrollbar'),
+		scrollBy: 1,
+		speed: 300,
+		elasticBounds: 1,
+		easing: 'swing',
+		dragHandle: 1,
+		dynamicHandle: 1,
+		clickBar: 1,
+		// Navigation buttons
+		pagesBar: $wrap.find('.pages'),
+		activatePageOn: 'click'
+	})
+
+
+	$(window).on('resize', function(){
+		$frame.sly("reload");
+	})
+
+	$frame.on('mousedown', function(e){ // test during 'mousedown' phase if distination LI is active item, before 'onclick'
+		if (  $(e.target).hasClass('active') ){
+			activeitem = $(e.target).data('itemindex')
+		}
+	})
+
+	$frame.on('click', function(e){ // onclick the main cover flow container
+		var $target = $(e.target)
+		if (  $(e.target).data('itemindex') == activeitem ){
+			onselecteditemclick(e, activeitem)
+		}
+	})
+
+	$overlayenlarge.unbind().on('click', function(){
+		if ( $enlargearea.data('isvisible') ){
+			$overlayenlarge.css({opacity:0, zIndex:-1})
+			$enlargearea.data('isvisible', false)
+		}
+	})
+
+}
+         
+        $(document).ready(function () {
+            coverflowimages({
+                coverid: 'coverflow-container',  // Use the correct ID of your coverflow container
+                images: [
+                    ['angelinasmall.jpg', 'angelina.jpg', 'Angelina Jolie, is an American actress and filmmaker, and an Academy Award winner'],
+                    ['millasmall.jpg', 'milla.jpg', 'Milla Jovovich was born in Ukraine and immigrated with her parents to the United States when she\'s five.'],
+                    ['josiesmall.jpg', 'josie.jpg'],
+                    ['haydensmall.jpg', 'hayden.jpg', 'Hayden Panettiere is a native of New York, and first appeared in a commercial at the age of 11 months.'],
+                    ['ashleysmall.jpg', 'ashley.jpg', 'Ashley was born in Granada Hills, California. She is the daughter of Naomi Judd, a country music singer and motivational speaker']
+                ]
+            });
+        });
+    </script>
+</head>
+<body>
+    <div id="container">
+        <h1>Your Musical Albums</h1>
+        <table>
+          
+            <tr>
+                <td><img src="album1.jpg" alt="Album 1"></td>
+                <td>Tha Block Is Hot is the debut major label studio album by American rapper Lil Wayne. It was released on November 2, 1999, by Universal Records and Bryan "Baby" Williams' Cash Money Records.[8] Recording sessions took place at Cash Money Studios in Metairie, Louisiana with the executive production from Bryan "Baby" Williams and Ronald "Slim" Williams, all of these tracks were produced by Mannie Fresh himself. Prior to release, the album was supposed to be titled I Ride At Night.[9]</td>
+            </tr>
+            <tr>
+                <td><img src="album2.jpg" alt="Album 2"></td>
+                <td>Lights Out is the second studio album by American rapper Lil Wayne. It was released on December 19, 2000, by Cash Money Records and Universal Records.</td>
+            </tr>
+            <tr>
+                <td><img src="album3.jpg" alt="Album 3"></td>
+                <td>500 Degreez is the third studio album by American rapper Lil Wayne. It was released on July 23, 2002, by Cash Money Records and Universal Records. The album's title was inspired by the album 400 Degreez (1998), by fellow rapper and label-mate Juvenile.</td>
+            </tr>
+            <tr>
+                <td><img src="album4.jpg" alt="Album 4"></td>
+                <td>Tha Carter is the fourth studio album by American rapper Lil Wayne. It was released on June 29, 2004, by Cash Money Records and Universal Records.[6] The production on the album was mostly handled by Cash Money's former in-house producer Mannie Fresh, before Mannie left the label. A chopped and screwed version of the album was also released by Cash Money Records in 2004. The album spawned four sequels: Tha Carter II, Tha Carter III, Tha Carter IV, and Tha Carter V.
+
+                    The album debuted at number five on the US Billboard 200 chart, selling 116,000 copies in its first week.[7] The album was later certified platinum by the Recording Industry Association of America (RIAA) in September 2020.[8]</td>
+            </tr>
+            <tr>
+                <td><img src="album5.jpg" alt="Album 5"></td>
+                <td>Tha Carter II is the fifth studio album by American rapper Lil Wayne. It was released on December 6, 2005, by Cash Money Records, Young Money Entertainment and Universal Records. Recording sessions took place from 2004 to 2005, with Birdman and his brother Ronald "Slim" Williams serving as the record's executive producers. Additional producers on the album included The Runners and The Heatmakerz, among others. The album serves as a sequel to his fourth album Tha Carter (2004), and was supported by three singles ("Fireman", "Hustler Musik" and "Shooter").
+
+                    Tha Carter II received critical acclaim and ranks highly in retrospectives of Lil Wayne's best work.[1][2] The album debuted at number two on the US Billboard 200 chart.[3] The album was later certified double platinum by the Recording Industry Association of America (RIAA) in September 2020.[4]</td>
+            </tr>
+            
+        </table>
+    </div>
+
+    
+    <div id="coverflow-container" class="coverflow-container">
+        <!-- Images and descriptions will be added dynamically using coverflow.js -->
+    </div>
+
+    <script src="jquery.min.js"></script>
+    <script src="sly.min.js"></script>
+    <script src="coverflow.js"></script>
+    
+</body>
+</html>
